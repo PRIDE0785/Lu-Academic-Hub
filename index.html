@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LU Academic Hub - Lira University</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============ CSS VARIABLES ============ */
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --primary-light: #7c8ef5;
+            --secondary: #764ba2;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --danger: #fc8181;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --text-muted: #8a8aa8;
+            --bg-primary: #f8f9fe;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --border-color: #e0e0e8;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.12);
+            --shadow-lg: 0 16px 48px rgba(0,0,0,0.16);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ============ DARK MODE ============ */
+        [data-theme="dark"] {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(26, 26, 46, 0.92);
+            --text-primary: #f0f0f8;
+            --text-secondary: #b0b0c8;
+            --text-muted: #707090;
+            --border-color: #2a2a4a;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+            --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
+        }
+
+        /* ============ RESET & BASE ============ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: var(--transition);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ============ TYPOGRAPHY ============ */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        a:hover {
+            color: var(--primary-dark);
+        }
+
+        /* ============ GLASS CARD ============ */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        .glass-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-4px);
+        }
+
+        /* ============ NAVIGATION ============ */
+        .navbar {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--primary) !important;
+        }
+        .navbar-brand i {
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--text-secondary) !important;
+            padding: 8px 16px !important;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+        .nav-link:hover {
+            color: var(--primary) !important;
+            background: rgba(102, 126, 234, 0.08);
+        }
+        .nav-link.active {
+            color: var(--primary) !important;
+            background: rgba(102, 126, 234, 0.12);
+        }
+
+        .dropdown-menu {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+        .dropdown-item {
+            color: var(--text-secondary);
+        }
+        .dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.08);
+            color: var(--primary);
+        }
+
+        /* ============ SEARCH BAR ============ */
+        .search-bar {
+            position: relative;
+            min-width: 250px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 8px 16px 8px 40px;
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: var(--transition);
+            font-size: 14px;
+        }
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+        }
+        .search-bar i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            margin-top: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .search-results .list-group-item {
+            border: none;
+            padding: 10px 16px;
+            background: transparent;
+            color: var(--text-primary);
+        }
+        .search-results .list-group-item:hover {
+            background: rgba(102, 126, 234, 0.06);
+        }
+
+        /* ============ HERO SECTION ============ */
+        .hero-section {
+            padding: 80px 0 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 60%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.05);
+            transform: rotate(-15deg);
+            border-radius: 50%;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            color: white;
+        }
+        .hero-content h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+        .hero-content p {
+            font-size: 1.15rem;
+            opacity: 0.92;
+            max-width: 550px;
+        }
+
+        /* ============ STATS CARDS ============ */
+        .stat-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: var(--transition);
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .stat-card .number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            display: block;
+            color: white;
+        }
+        .stat-card .label {
+            font-size: 0.85rem;
+            opacity: 0.85;
+            color: white;
+        }
+
+        /* ============ PAPER CARDS ============ */
+        .paper-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            height: 100%;
+        }
+        .paper-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-md);
+        }
+        .paper-card .card-image {
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            position: relative;
+        }
+        .paper-card .card-body {
+            padding: 16px 20px;
+        }
+        .paper-card .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .paper-card .card-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .paper-card .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        /* ============ BUTTONS ============ */
+        .btn {
+            border-radius: var(--radius-sm);
+            padding: 10px 22px;
+            font-weight: 500;
+            transition: var(--transition);
+            border: none;
+            font-size: 0.9rem;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+            color: white;
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.35);
+            color: white;
+        }
+        .btn-outline-primary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .btn-light {
+            background: white;
+            color: var(--primary);
+        }
+        .btn-light:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            color: var(--primary-dark);
+        }
+        .btn-outline-light {
+            border: 2px solid rgba(255,255,255,0.5);
+            color: white;
+        }
+        .btn-outline-light:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* ============ FOOTER ============ */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 50px 0 30px;
+            margin-top: 60px;
+        }
+        .footer h5 {
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: var(--text-primary);
+        }
+        .footer ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer ul li {
+            margin-bottom: 8px;
+        }
+        .footer ul li a {
+            color: var(--text-secondary);
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+        .footer ul li a:hover {
+            color: var(--primary);
+            padding-left: 4px;
+        }
+        .social-links a {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        .social-links a:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* ============ TOAST ============ */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+        .toast {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--primary);
+            margin-bottom: 10px;
+            animation: slideInRight 0.4s ease;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-success { border-left-color: var(--success); }
+        .toast-error { border-left-color: var(--danger); }
+        .toast-warning { border-left-color: var(--warning); }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 992px) {
+            .search-bar { min-width: 180px; }
+            .hero-content h1 { font-size: 2.5rem; }
+        }
+        @media (max-width: 768px) {
+            .hero-section { padding: 40px 0 30px; min-height: auto; }
+            .hero-content h1 { font-size: 1.8rem; }
+            .stat-card .number { font-size: 1.5rem; }
+            .navbar-brand { font-size: 1rem; }
+            .search-bar { min-width: 100%; margin: 8px 0; }
+        }
+        @media (max-width: 576px) {
+            .hero-content h1 { font-size: 1.5rem; }
+            .paper-card .card-image { height: 80px; font-size: 24px; }
+        }
+
+        /* ============ SCROLLBAR ============ */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+
+        /* ============ FEATURE ICONS ============ */
+        .icon-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- NAVIGATION -->
+<!-- ============================================================ -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-graduation-cap me-2"></i>
+            <span class="fw-bold">LU Academic Hub</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link active" href="/"><i class="fas fa-home me-1"></i>Home</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="fas fa-file-alt me-1"></i>Papers</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">All Papers</a></li>
+                        <li><a class="dropdown-item" href="#">Latest Uploads</a></li>
+                        <li><a class="dropdown-item" href="#">Popular Downloads</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-upload text-success me-2"></i>Upload Paper</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-book me-1"></i>Courses</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-comments me-1"></i>Forum</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-flask me-1"></i>Research</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-bullhorn me-1"></i>Announcements</a></li>
+            </ul>
+            
+            <div class="d-flex align-items-center gap-2">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="search-input" placeholder="Search papers...">
+                    <div class="search-results dropdown-menu w-100"></div>
+                </div>
+                
+                <button class="btn btn-ghost rounded-circle" id="darkModeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-primary rounded-circle p-2" id="userDropdown" data-bs-toggle="dropdown">
+                        <i class="fas fa-user"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-bookmark me-2"></i>Bookmarks</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/auth/logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- HERO SECTION -->
+<!-- ============================================================ -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7 hero-content">
+                <div class="badge bg-light text-dark mb-3 py-2 px-3">
+                    <i class="fas fa-graduation-cap me-2"></i> Lira University
+                </div>
+                <h1>Your Academic Success <br>Starts Here</h1>
+                <p>Access thousands of past papers, lecture notes, and academic resources from Lira University's vast repository.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="/auth/register.php" class="btn btn-light btn-lg"><i class="fas fa-user-plus me-2"></i>Get Started</a>
+                    <a href="#browse" class="btn btn-outline-light btn-lg"><i class="fas fa-search me-2"></i>Browse Papers</a>
+                </div>
+                
+                <div class="row g-3 mt-5">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <span class="number">12,000+</span>
+                            <span class="label">Past Papers</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <span class="number">8</span>
+                            <span class="label">Faculties</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <span class="number">120</span>
+                            <span class="label">Courses</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <span class="number">4,000</span>
+                            <span class="label">Students</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="text-center">
+                    <i class="fas fa-graduation-cap" style="font-size: 200px; color: rgba(255,255,255,0.2);"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- QUICK SEARCH -->
+<!-- ============================================================ -->
+<section class="py-5" id="browse">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="glass-card p-4 p-md-5">
+                    <h3 class="text-center mb-4"><i class="fas fa-search text-primary me-2"></i>Quick Search</h3>
+                    <form action="/search.php" method="GET">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" name="q" class="form-control form-control-lg" placeholder="Search by title, course code, or keywords...">
+                            </div>
+                            <div class="col-md-3">
+                                <select name="faculty" class="form-select form-select-lg">
+                                    <option value="">All Faculties</option>
+                                    <option value="1">Faculty of Health Sciences</option>
+                                    <option value="2">Faculty of Education</option>
+                                    <option value="3">Faculty of Business</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="year" class="form-select form-select-lg">
+                                    <option value="">All Years</option>
+                                    <option value="2023/2024">2023/2024</option>
+                                    <option value="2022/2023">2022/2023</option>
+                                    <option value="2021/2022">2021/2022</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-lg w-100"><i class="fas fa-search me-2"></i>Search Papers</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- LATEST PAPERS -->
+<!-- ============================================================ -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-file-alt text-primary me-2"></i>Latest Uploaded Papers</h2>
+            <a href="#" class="btn btn-outline-primary">View All</a>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Paper Card 1 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="paper-card">
+                    <div class="card-image">
+                        <i class="fas fa-file-pdf"></i>
+                        <span class="badge bg-success position-absolute top-0 end-0 m-2">New</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Introduction to Nursing - Final Exam 2023</h5>
+                        <div class="card-meta">
+                            <span class="badge bg-primary">NUR101</span>
+                            <span class="badge bg-secondary">Health Sciences</span>
+                        </div>
+                        <div class="card-meta mt-2">
+                            <i class="far fa-calendar-alt"></i> 2023/2024
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-download"></i> 234
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-eye"></i> 1,245
+                        </div>
+                        <div class="card-actions">
+                            <a href="#" class="btn btn-primary btn-sm flex-grow-1"><i class="fas fa-eye me-1"></i>View</a>
+                            <a href="#" class="btn btn-success btn-sm"><i class="fas fa-download"></i></a>
+                            <button class="btn btn-outline-secondary btn-sm"><i class="far fa-bookmark"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Paper Card 2 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="paper-card">
+                    <div class="card-image">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Public Health - Mid Semester 2023</h5>
+                        <div class="card-meta">
+                            <span class="badge bg-primary">PUB101</span>
+                            <span class="badge bg-secondary">Health Sciences</span>
+                        </div>
+                        <div class="card-meta mt-2">
+                            <i class="far fa-calendar-alt"></i> 2023/2024
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-download"></i> 189
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-eye"></i> 876
+                        </div>
+                        <div class="card-actions">
+                            <a href="#" class="btn btn-primary btn-sm flex-grow-1"><i class="fas fa-eye me-1"></i>View</a>
+                            <a href="#" class="btn btn-success btn-sm"><i class="fas fa-download"></i></a>
+                            <button class="btn btn-outline-secondary btn-sm"><i class="far fa-bookmark"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Paper Card 3 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="paper-card">
+                    <div class="card-image">
+                        <i class="fas fa-file-pdf"></i>
+                        <span class="badge bg-warning position-absolute top-0 end-0 m-2">Popular</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Business Administration - Final Exam 2023</h5>
+                        <div class="card-meta">
+                            <span class="badge bg-primary">BUS101</span>
+                            <span class="badge bg-secondary">Business</span>
+                        </div>
+                        <div class="card-meta mt-2">
+                            <i class="far fa-calendar-alt"></i> 2023/2024
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-download"></i> 456
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-eye"></i> 2,134
+                        </div>
+                        <div class="card-actions">
+                            <a href="#" class="btn btn-primary btn-sm flex-grow-1"><i class="fas fa-eye me-1"></i>View</a>
+                            <a href="#" class="btn btn-success btn-sm"><i class="fas fa-download"></i></a>
+                            <button class="btn btn-outline-secondary btn-sm"><i class="far fa-bookmark"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- FEATURES SECTION -->
+<!-- ============================================================ -->
+<section class="py-5 bg-light" style="background: var(--bg-primary);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>Why Choose LU Academic Hub?</h2>
+            <p class="text-muted">Your comprehensive academic resource platform</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="glass-card text-center p-4 feature-card">
+                    <div class="icon-circle bg-primary text-white mx-auto mb-3">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h5>Easy Upload</h5>
+                    <p class="text-muted">Upload your past papers and learning materials with ease</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card text-center p-4 feature-card">
+                    <div class="icon-circle bg-success text-white mx-auto mb-3">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h5>Smart Search</h5>
+                    <p class="text-muted">Find exactly what you need with advanced search filters</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card text-center p-4 feature-card">
+                    <div class="icon-circle bg-info text-white mx-auto mb-3">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h5>Community</h5>
+                    <p class="text-muted">Connect with fellow students and share knowledge</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- FOOTER -->
+<!-- ============================================================ -->
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <h5><i class="fas fa-graduation-cap text-primary me-2"></i>LU Academic Hub</h5>
+                <p class="text-muted">Lira University's premier academic resource hub. Access past papers, lecture notes, and learning materials.</p>
+                <div class="social-links mt-3">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <h5>Quick Links</h5>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="#">Past Papers</a></li>
+                    <li><a href="#">Courses</a></li>
+                    <li><a href="#">Forum</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <h5>Resources</h5>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <h5>Stay Updated</h5>
+                <p class="text-muted">Subscribe for updates on new materials</p>
+                <form class="mt-2">
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Your email" required>
+                        <button class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="text-muted mb-0">&copy; 2024 LU Academic Hub. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <p class="text-muted mb-0"><i class="fas fa-code me-1"></i> Built with <i class="fas fa-heart text-danger mx-1"></i> for Lira University</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ============================================================ -->
+<!-- TOAST CONTAINER -->
+<!-- ============================================================ -->
+<div class="toast-container"></div>
+
+<!-- ============================================================ -->
+<!-- SCRIPTS -->
+<!-- ============================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ============ DARK MODE ============
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const html = document.documentElement;
+    const icon = darkModeToggle.querySelector('i');
+    
+    // Load saved preference
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    
+    darkModeToggle.addEventListener('click', function() {
+        const current = html.getAttribute('data-theme');
+        const newTheme = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    });
+
+    // ============ SEARCH AUTOCOMPLETE ============
+    const searchInput = document.querySelector('.search-input');
+    const searchResults = document.querySelector('.search-results');
+    let timeout;
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        clearTimeout(timeout);
+        
+        if (query.length < 2) {
+            searchResults.style.display = 'none';
+            return;
+        }
+        
+        timeout = setTimeout(() => {
+            // Simulate search results
+            const results = [
+                { title: 'Introduction to Nursing', code: 'NUR101', downloads: 234 },
+                { title: 'Public Health - Mid Semester', code: 'PUB101', downloads: 189 },
+                { title: 'Business Administration Final', code: 'BUS101', downloads: 456 }
+            ].filter(item => item.title.toLowerCase().includes(query.toLowerCase()) || 
+                               item.code.toLowerCase().includes(query.toLowerCase()));
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="p-3 text-muted">No results found</div>';
+            } else {
+                let html = '';
+                results.forEach(item => {
+                    html += `
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${item.title}</strong>
+                                    <div class="text-muted small">${item.code}</div>
+                                </div>
+                                <span class="badge bg-primary">${item.downloads} downloads</span>
+                            </div>
+                        </a>
+                    `;
+                });
+                searchResults.innerHTML = html;
+            }
+            searchResults.style.display = 'block';
+        }, 300);
+    });
+
+    // Close search results on outside click
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+
+    // ============ TOAST SYSTEM ============
+    function showToast(message, type = 'info', duration = 5000) {
+        const container = document.querySelector('.toast-container');
+        const colors = {
+            success: '#48bb78',
+            error: '#fc8181',
+            warning: '#ed8936',
+            info: '#667eea'
+        };
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.style.borderLeftColor = colors[type] || colors.info;
+        toast.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span>${message}</span>
+                <button class="btn-close btn-close-sm" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // Make showToast globally available
+    window.showToast = showToast;
+
+    // ============ BOOKMARK FUNCTION ============
+    window.bookmark = function(paperId) {
+        showToast('Bookmarked successfully!', 'success');
+    };
+
+    // ============ DEMO TOAST ============
+    // Show welcome toast after 2 seconds
+    setTimeout(() => {
+        showToast('Welcome to LU Academic Hub! 🎓', 'success', 3000);
+    }, 2000);
+});
+</script>
+
+</body>
+</html>
