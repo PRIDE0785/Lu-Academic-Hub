@@ -1,0 +1,19 @@
+# Ignore runtime and sensitive files
+/vendor/
+/node_modules/
+/.env
+/config/config.php
+/uploads/
+/backups/
+/logs/
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db
+
+# Composer
+composer.lock
+
+# OS files
+ehthumbs.db
+

@@ -1,0 +1,350 @@
+-- Lu Academic Hub - schema.sql
+-- Engine: InnoDB, Charset: utf8mb4
+SET FOREIGN_KEY_CHECKS=0;
+CREATE DATABASE IF NOT EXISTS lu_academic_hub CHARACTER SET = 'utf8mb4' COLLATE = 'utf8mb4_unicode_ci';
+USE lu_academic_hub;
+
+-- Roles
+CREATE TABLE IF NOT EXISTS roles (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(50) NOT NULL UNIQUE,
+  description VARCHAR(255) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Permissions (optional granular permissions)
+CREATE TABLE IF NOT EXISTS permissions (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL UNIQUE,
+  description VARCHAR(255) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS role_permissions (
+  role_id INT UNSIGNED NOT NULL,
+  permission_id INT UNSIGNED NOT NULL,
+  PRIMARY KEY (role_id, permission_id),
+  FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+  FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Users
+CREATE TABLE IF NOT EXISTS users (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  role_id INT UNSIGNED NOT NULL DEFAULT 1,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  username VARCHAR(100) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  first_name VARCHAR(100) NULL,
+  last_name VARCHAR(100) NULL,
+  profile_image VARCHAR(255) NULL,
+  is_email_verified TINYINT(1) DEFAULT 0,
+  is_active TINYINT(1) DEFAULT 1,
+  must_change_password TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  last_login_at TIMESTAMP NULL,
+  INDEX idx_email (email),
+  INDEX idx_username (username),
+  FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Faculties
+CREATE TABLE IF NOT EXISTS faculties (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  code VARCHAR(50) NULL,
+  description TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_faculty_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Departments
+CREATE TABLE IF NOT EXISTS departments (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  faculty_id INT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  code VARCHAR(50) NULL,
+  description TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_dept_faculty_name (faculty_id, name),
+  FOREIGN KEY (faculty_id) REFERENCES faculties(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Courses
+CREATE TABLE IF NOT EXISTS courses (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  department_id INT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  code VARCHAR(50) NOT NULL,
+  credits SMALLINT UNSIGNED DEFAULT 0,
+  description TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_course_code (code),
+  FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Course Units (course units / module list)
+CREATE TABLE IF NOT EXISTS course_units (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  course_id INT UNSIGNED NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  code VARCHAR(50) NULL,
+  semester ENUM('1','2','Both') DEFAULT '1',
+  description TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tags for papers (for efficient search & filtering)
+CREATE TABLE IF NOT EXISTS tags (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Past papers
+CREATE TABLE IF NOT EXISTS past_papers (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(500) NOT NULL,
+  course_id INT UNSIGNED NULL,
+  course_unit_id INT UNSIGNED NULL,
+  course_code VARCHAR(80) NULL,
+  faculty_id INT UNSIGNED NULL,
+  department_id INT UNSIGNED NULL,
+  lecturer_id INT UNSIGNED NULL,
+  academic_year VARCHAR(20) NULL,
+  semester ENUM('1','2','Both') DEFAULT '1',
+  document_type ENUM('PDF','DOCX','PPT','ZIP','IMAGE','OTHER') DEFAULT 'PDF',
+  filename VARCHAR(255) NOT NULL, -- stored file name
+  filepath VARCHAR(500) NOT NULL, -- relative path in /uploads/papers
+  filesize BIGINT UNSIGNED NOT NULL,
+  mime_type VARCHAR(100) NULL,
+  thumbnail VARCHAR(255) NULL,
+  description TEXT NULL,
+  status ENUM('pending','approved','rejected','archived') DEFAULT 'pending',
+  uploader_id INT UNSIGNED NOT NULL,
+  upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  downloads INT UNSIGNED DEFAULT 0,
+  views INT UNSIGNED DEFAULT 0,
+  rating_avg DECIMAL(3,2) DEFAULT 0.00,
+  rating_count INT UNSIGNED DEFAULT 0,
+  is_public TINYINT(1) DEFAULT 1,
+  INDEX idx_course_code (course_code),
+  INDEX idx_academic_year (academic_year),
+  INDEX idx_status (status),
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL,
+  FOREIGN KEY (course_unit_id) REFERENCES course_units(id) ON DELETE SET NULL,
+  FOREIGN KEY (faculty_id) REFERENCES faculties(id) ON DELETE SET NULL,
+  FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
+  FOREIGN KEY (uploader_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Paper <-> Tag mapping
+CREATE TABLE IF NOT EXISTS paper_tags (
+  paper_id BIGINT UNSIGNED NOT NULL,
+  tag_id INT UNSIGNED NOT NULL,
+  PRIMARY KEY (paper_id, tag_id),
+  FOREIGN KEY (paper_id) REFERENCES past_papers(id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Downloads
+CREATE TABLE IF NOT EXISTS downloads (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  paper_id BIGINT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NULL,
+  ip_address VARCHAR(45) NULL,
+  user_agent VARCHAR(255) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (paper_id) REFERENCES past_papers(id) ON DELETE CASCADE,
+  INDEX idx_download_paper (paper_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Bookmarks
+CREATE TABLE IF NOT EXISTS bookmarks (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  paper_id BIGINT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_user_paper_bookmark (user_id, paper_id),
+  FOREIGN KEY (paper_id) REFERENCES past_papers(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Favorites (alias for bookmarks or separate)
+CREATE TABLE IF NOT EXISTS favorites (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  paper_id BIGINT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_user_paper_fav (user_id, paper_id),
+  FOREIGN KEY (paper_id) REFERENCES past_papers(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Ratings
+CREATE TABLE IF NOT EXISTS ratings (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  paper_id BIGINT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  rating TINYINT UNSIGNED NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  review TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_user_paper_rating (paper_id, user_id),
+  FOREIGN KEY (paper_id) REFERENCES past_papers(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Comments (on papers)
+CREATE TABLE IF NOT EXISTS comments (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  paper_id BIGINT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  parent_id BIGINT UNSIGNED NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  is_hidden TINYINT(1) DEFAULT 0,
+  FOREIGN KEY (paper_id) REFERENCES past_papers(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Notifications
+CREATE TABLE IF NOT EXISTS notifications (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  type VARCHAR(100) NOT NULL,
+  payload JSON NULL,
+  is_read TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user_unread (user_id, is_read)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Announcements
+CREATE TABLE IF NOT EXISTS announcements (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  author_id INT UNSIGNED NOT NULL,
+  is_pinned TINYINT(1) DEFAULT 0,
+  is_public TINYINT(1) DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Forums: threads & replies
+CREATE TABLE IF NOT EXISTS forum_threads (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  course_id INT UNSIGNED NULL,
+  content TEXT NOT NULL,
+  is_pinned TINYINT(1) DEFAULT 0,
+  is_locked TINYINT(1) DEFAULT 0,
+  views INT UNSIGNED DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS forum_replies (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  thread_id BIGINT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  content TEXT NOT NULL,
+  is_best_answer TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (thread_id) REFERENCES forum_threads(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Messages (direct messages)
+CREATE TABLE IF NOT EXISTS messages (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  sender_id INT UNSIGNED NOT NULL,
+  recipient_id INT UNSIGNED NOT NULL,
+  subject VARCHAR(255) NULL,
+  body TEXT NOT NULL,
+  is_read TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_recipient_unread (recipient_id, is_read)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Activity logs
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NULL,
+  action VARCHAR(255) NOT NULL,
+  context JSON NULL,
+  ip_address VARCHAR(45) NULL,
+  user_agent VARCHAR(255) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_action_time (action, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Reports (users report content)
+CREATE TABLE IF NOT EXISTS reports (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  reporter_id INT UNSIGNED NOT NULL,
+  object_type VARCHAR(50) NOT NULL, -- 'paper','comment','user','thread' ...
+  object_id BIGINT UNSIGNED NOT NULL,
+  reason VARCHAR(255) NULL,
+  details TEXT NULL,
+  status ENUM('open','investigating','resolved','dismissed') DEFAULT 'open',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Settings (key-value)
+CREATE TABLE IF NOT EXISTS settings (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `key` VARCHAR(191) NOT NULL UNIQUE,
+  `value` TEXT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Audit logs (security sensitive)
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  actor_id INT UNSIGNED NULL,
+  action VARCHAR(255) NOT NULL,
+  target JSON NULL,
+  result JSON NULL,
+  ip_address VARCHAR(45) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Password resets
+CREATE TABLE IF NOT EXISTS password_resets (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  token VARCHAR(255) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_token (token),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Sessions (simple session store)
+CREATE TABLE IF NOT EXISTS sessions (
+  id CHAR(128) PRIMARY KEY,
+  user_id INT UNSIGNED NULL,
+  data LONGTEXT,
+  last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS=1;
